@@ -1,7 +1,7 @@
-from datetime import date, time
+from datetime import date, time, datetime
 
-from sqlalchemy import Date, String, Text, Time
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy import ForeignKey, Text
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class Base(DeclarativeBase):
@@ -22,3 +22,22 @@ class Patients(Base):
     appointment_date: Mapped[date]
     appointment_time: Mapped[time]
     timezone: Mapped[str]
+
+    calls: Mapped[list["CallAttempts"]] = relationship(back_populates="patient")
+
+class CallAttempts(Base):
+    __tablename__ = "calls"
+
+    call_attempt_id: Mapped[str] = mapped_column(primary_key=True)
+    patient_id: Mapped[str] = mapped_column(ForeignKey("patients.id"))
+    retell_call_id: Mapped[str]
+    created_at: Mapped[datetime]
+    started_at: Mapped[datetime]
+    ended_at: Mapped[datetime]
+    call_duration: Mapped[int]
+    call_status: Mapped[str]
+    successful: Mapped[bool]
+    recording_url: Mapped[str]
+    summary: Mapped[str] = mapped_column(Text)
+
+    patient: Mapped["Patients"] = relationship(back_populates="calls")
