@@ -25,10 +25,7 @@ def initiate_retell_call(patient_number: str):
 def create_call_attempt(patient_id: str, db: Session):
     record = CallAttempts(
         patient_id=patient_id,
-        call_date=datetime.now(),
-        call_time=datetime.now().time(),
-        call_duration=0,
-        call_type="phone",
+        created_at=datetime.now(),
         call_status="pending"
     )
     db.add(record)
@@ -43,6 +40,7 @@ def call_patient(patient: Patients, db: Session):
     call_succeeded = initiate_retell_call(patient.phone_number)
     retell_call_id = call_succeeded.call_id
     call_attempt.call_status = "initiated"
+    call_attempt.retell_call_id = retell_call_id
 
     if not call_succeeded:
         call_attempt.call_status = "failed"
