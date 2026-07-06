@@ -1,0 +1,246 @@
+:root {
+  --text: #475569;
+  --text-h: #0f172a;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --border: #dbe3ee;
+  --muted: #64748b;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --success: #15803d;
+  --success-bg: #dcfce7;
+  --pending: #b45309;
+  --pending-bg: #fef3c7;
+  --failed: #b91c1c;
+  --failed-bg: #fee2e2;
+  --selected: #eff6ff;
+
+  font: 16px/1.5 system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+h1,
+h2 {
+  margin: 0;
+  color: var(--text-h);
+}
+
+h1 {
+  font-size: 2rem;
+}
+
+h2 {
+  font-size: 1.125rem;
+}
+
+p {
+  margin: 0;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.app {
+  width: min(1100px, 100%);
+  margin: 0 auto;
+  padding: 2rem 1.25rem 3rem;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.app-header,
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.eyebrow {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.lede,
+.panel-header p,
+.patient-meta,
+.call-item-meta,
+.status-message {
+  color: var(--muted);
+}
+
+.lede,
+.panel-header p {
+  margin-top: 0.5rem;
+}
+
+.panel-header {
+  margin-bottom: 1rem;
+}
+
+.primary-button {
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: white;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.primary-button:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.primary-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.patient-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.patient-table th,
+.patient-table td {
+  padding: 0.875rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.patient-table th {
+  font-size: 0.875rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.patient-row {
+  cursor: pointer;
+}
+
+.patient-row:hover {
+  background: #f1f5f9;
+}
+
+.patient-row.selected {
+  background: var(--selected);
+}
+
+.patient-name {
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.patient-meta,
+.call-item-meta {
+  font-size: 0.875rem;
+  margin-top: 0.15rem;
+}
+
+.status-message {
+  padding: 0.75rem 0;
+}
+
+.status-message.error {
+  color: var(--failed);
+}
+
+.call-history {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.call-item {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.875rem;
+}
+
+.call-item-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.call-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.35rem;
+}
+
+.status-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+}
+
+.status-badge.status-pending,
+.call-item.status-pending {
+  background: var(--pending-bg);
+  color: var(--pending);
+}
+
+.status-badge.status-success,
+.call-item.status-success {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.status-badge.status-failed,
+.call-item.status-failed {
+  background: var(--failed-bg);
+  color: var(--failed);
+}
+
+@media (max-width: 720px) {
+  .app-header {
+    flex-direction: column;
+  }
+
+  .primary-button {
+    width: 100%;
+  }
+}
