@@ -15,7 +15,14 @@ def create_call(patient_id: str, db: Session = Depends(get_db)):
     call_attempt = call_patient(patient, db)
     return call_attempt
 
-@router.get("/calls")
-def get_calls(db: Session = Depends(get_db)):
-    calls = db.query(CallAttempts).all()
-    return calls
+@router.get("/patients/{patient_id}/calls")
+def get_calls(patient_id: str, db: Session = Depends(get_db)):
+    patient = db.query(Patients).filter(Patients.id == patient_id).first()
+    if patient is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found")
+    call_history = (db.query(CallAttempts)
+    .filter(CallAttempts.patient_id == patient_id)
+    .order_by(CallAttempts.created_at.desc())
+    .all()
+    )
+    return call_history
