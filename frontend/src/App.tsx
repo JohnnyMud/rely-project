@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import {
   createCall,
   fetchPatients,
+  fetchCallRecords,
   type CallAttempt,
   type Patient,
 } from './api'
@@ -49,6 +50,49 @@ function App() {
   }, [])
 
   const selectedPatient = patients.find((patient) => patient.id === selectedPatientId)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadCallRecords() {
+      if (!selectedPatientId || !selectedPatient) {
+        setCallAttempts([])
+        return
+      }
+
+      try {
+        const data = await fetchCallRecords(selectedPatientId)
+        if (cancelled) {
+          return
+        }
+
+        const mappedAttempts: CallAttempt[] = data.map((record) => ({
+          id: record.call_attempt_id,
+          patientId: record.patient_id,
+          patientName: `${selectedPatient.first_name} ${selectedPatient.last_name}`,
+          startedAt: record.started_at ?? record.created_at,
+          status:
+            record.call_status === 'failed'
+              ? 'failed'
+              : record.call_status === 'pending'
+                ? 'pending'
+                : 'success',
+          message: record.summary ?? undefined,
+        }))
+        setCallAttempts(mappedAttempts)
+      } catch {
+        if (!cancelled) {
+          setCallAttempts([])
+        }
+      }
+    }
+
+    void loadCallRecords()
+
+    return () => {
+      cancelled = true
+    }
+  }, [selectedPatientId, selectedPatient])
 
   async function handleStartCall() {
     if (!selectedPatient) {

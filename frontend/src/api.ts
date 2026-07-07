@@ -14,14 +14,18 @@ export type Patient = {
   timezone: string
 }
 
-export type Call = {
-  id: string
+export type CallRecord = {
+  call_attempt_id: string
   patient_id: string
-  call_date: string
-  call_time: string
-  call_duration: number
-  call_type: string
+  retell_call_id: string | null
+  created_at: string
+  started_at: string | null
+  ended_at: string | null
+  call_duration: number | null
   call_status: string
+  successful: boolean | null
+  recording_url: string | null
+  summary: string | null
 }
 
 export type CallAttemptStatus = 'pending' | 'success' | 'failed'
@@ -61,27 +65,22 @@ export async function fetchPatients(): Promise<Patient[]> {
   return response.json() as Promise<Patient[]>
 }
 
-export async function createCall(patientId: string): Promise<Call> {
-  const now = new Date()
-  const body = {
-    id: `call_${crypto.randomUUID()}`,
-    patient_id: patientId,
-    call_date: now.toISOString().slice(0, 10),
-    call_time: now.toTimeString().slice(0, 8),
-    call_duration: 0,
-    call_type: 'appointment_reminder',
-    call_status: 'initiated',
+export async function fetchCallRecords(patientId: string): Promise<CallRecord[]> {
+  const response = await fetch(`${API_BASE}/patients/${patientId}/calls`)
+  if (!response.ok) {
+    throw new Error(await parseError(response))
   }
+  return response.json() as Promise<CallRecord[]>
+}
 
-  const response = await fetch(`${API_BASE}/calls`, {
+export async function createCall(patientId: string): Promise<CallRecord> {
+  const response = await fetch(`${API_BASE}/patients/${patientId}/calls`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
   })
 
   if (!response.ok) {
     throw new Error(await parseError(response))
   }
 
-  return response.json() as Promise<Call>
+  return response.json() as Promise<CallRecord>
 }

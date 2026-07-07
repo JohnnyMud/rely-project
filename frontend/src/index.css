@@ -5,15 +5,15 @@
   --surface: #ffffff;
   --border: #dbe3ee;
   --muted: #64748b;
-  --accent: #2563eb;
-  --accent-hover: #1d4ed8;
+  --accent: #3a4f9a;
+  --accent-hover: #304288;
   --success: #15803d;
   --success-bg: #dcfce7;
   --pending: #b45309;
   --pending-bg: #fef3c7;
   --failed: #b91c1c;
   --failed-bg: #fee2e2;
-  --selected: #eff6ff;
+  --selected: #eef1fb;
 
   font: 16px/1.5 system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: var(--text);
