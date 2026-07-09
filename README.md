@@ -33,11 +33,13 @@ POSTGRES_USER="local"
 POSTGRES_PASSWORD="rely123"
 RETELL_API_KEY="your_retell_api_key"
 RETELL_AGENT_ID="agent_xxxxxxxxxxxxxxxxxxxxxxxx"
+TEST_NUMBER="+1XXXXXXXXXX"
 ```
 
 Notes:
 
 - `RETELL_AGENT_ID` should include the `agent_` prefix.
+- `TEST_NUMBER` is the phone number used for the one callable demo patient (Ava Thompson) when you run the seed script. Use a number you can answer during demos.
 - Current project DB config defaults to:
   - `postgresql://local:rely123@localhost:5432/patient_calls`
   - If you change credentials, update both `app/db.py` and `alembic.ini`.
@@ -54,7 +56,27 @@ docker compose up -d db
 uv run alembic upgrade head
 ```
 
-## 5) Start the app
+## 5) Seed demo data
+
+Populate the database with synthetic patients and sample call history:
+
+```bash
+uv run python scripts/seed_demo.py
+```
+
+To wipe previous demo rows and reseed:
+
+```bash
+uv run python scripts/seed_demo.py --reset
+```
+
+Notes:
+
+- Demo patients use medical record numbers prefixed with `DEMO-`. The script only creates or deletes those rows, so hand-entered data is left alone.
+- If `TEST_NUMBER` is set, Ava Thompson is seeded with that number so you can place a real Retell call from the UI. Other patients use fictional `555` numbers.
+- If `TEST_NUMBER` is missing, the script still seeds data but warns that no patient is callable.
+
+## 6) Start the app
 
 ### Option A (recommended): use dev environment scripts
 
@@ -80,7 +102,7 @@ npm run dev
 cloudflared tunnel --url http://localhost:8000
 ```
 
-## 6) Register/update Retell webhook (dev_up.sh should have already set this up, but just in case)
+## 7) Register/update Retell webhook (dev_up.sh should have already set this up, but just in case)
 
 Use the tunnel URL from `cloudflared` and point Retell to:
 
