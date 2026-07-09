@@ -6,7 +6,7 @@ from app.models import Patients
 from app.schemas import PatientCreate, PatientResponse
 from app.logic.patient_manager import create_patient
 
-router = APIRouter()
+router = APIRouter(tags=["patients"])
 
 @router.get("/patients", response_model=list[PatientResponse])
 def get_patients(db: Session = Depends(get_db)):

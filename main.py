@@ -29,7 +29,7 @@ app.add_middleware(
 # ─── ROUTER REGISTRATION ─────────────────────────────────────────────────
 app.include_router(api_router)
 
-@app.get("/")
+@app.get("/", tags=["health"])
 async def root():
     """
     Health check endpoint to verify the API is up and running.
