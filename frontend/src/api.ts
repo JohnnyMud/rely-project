@@ -59,11 +59,22 @@ export type TranscriptSocketEvent =
       type: 'transcript_snapshot'
       messages: TranscriptMessage[]
     }
+  | {
+      call_id: string
+      type: 'emergency_status'
+      is_emergency: boolean
+    }
 
 export function isTranscriptSnapshot(
   event: TranscriptSocketEvent,
 ): event is Extract<TranscriptSocketEvent, { type: 'transcript_snapshot' }> {
   return 'type' in event && event.type === 'transcript_snapshot'
+}
+
+export function isEmergencyStatus(
+  event: TranscriptSocketEvent,
+): event is Extract<TranscriptSocketEvent, { type: 'emergency_status' }> {
+  return 'type' in event && event.type === 'emergency_status'
 }
 
 async function parseError(response: Response): Promise<string> {

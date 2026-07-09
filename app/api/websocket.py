@@ -12,9 +12,14 @@ from app.logic.transcript_manager import transcript_manager
 router = APIRouter(prefix="/websocket", tags=["websocket"])
 
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-5.1")
-OPENAI_SYSTEM_PROMPT = (
-    "You are a helpful, concise phone agent for patient appointment reminder "
-    "calls. Keep responses brief, natural, and easy to understand over the phone."
+OPENAI_SYSTEM_PROMPT = ("You are a helpful medical assistant that can answer questions and help with tasks. Remind the patient of their upcoming appointment tommorow")
+EMERGENCY_DETECTOR_PROMPT = (
+    "Determine whether the patient is currently describing a medical emergency "
+    "that needs immediate help. Examples include severe chest pain, trouble "
+    "breathing, stroke symptoms, uncontrolled bleeding, loss of consciousness, "
+    "overdose, or immediate risk of self-harm. Use the full conversation for "
+    "context. Do not classify routine symptoms, scheduling questions, or past "
+    "resolved events as current emergencies."
 )
 
 
@@ -106,6 +111,65 @@ def extract_transcript_messages(payload: dict) -> list[dict[str, str]]:
 
 async def generate_openai_response(messages: list[dict[str, str]]) -> str:
     return await asyncio.to_thread(generate_openai_response_sync, messages)
+
+
+async def detect_emergency(messages: list[dict[str, str]]) -> bool:
+    try:
+        return await asyncio.to_thread(detect_emergency_sync, messages)
+    except Exception as exc:
+        print(f"Emergency detection failed: {exc}")
+        return False
+
+
+def detect_emergency_sync(messages: list[dict[str, str]]) -> bool:
+    api_key = load_openai_api_key()
+    url = "https://api.openai.com/v1/responses"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+    body = json.dumps(
+        {
+            "model": OPENAI_MODEL,
+            "instructions": EMERGENCY_DETECTOR_PROMPT,
+            "input": messages,
+            "max_output_tokens": 50,
+            "text": {
+                "format": {
+                    "type": "json_schema",
+                    "name": "emergency_detection",
+                    "strict": True,
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "is_emergency": {"type": "boolean"},
+                        },
+                        "required": ["is_emergency"],
+                        "additionalProperties": False,
+                    },
+                }
+            },
+        }
+    ).encode("utf-8")
+    openai_request = request.Request(
+        url,
+        data=body,
+        headers=headers,
+        method="POST",
+    )
+
+    try:
+        with request.urlopen(openai_request, timeout=20) as response:
+            data = json.loads(response.read().decode("utf-8"))
+    except error.HTTPError as exc:
+        error_body = exc.read().decode("utf-8")
+        raise RuntimeError(f"OpenAI emergency detector error: {error_body}") from exc
+
+    result = json.loads(extract_openai_text(data))
+    is_emergency = result.get("is_emergency")
+    if not isinstance(is_emergency, bool):
+        raise ValueError("Emergency detector returned an invalid schema")
+    return is_emergency
 
 
 def generate_openai_response_sync(messages: list[dict[str, str]]) -> str:
@@ -201,7 +265,11 @@ async def retell_agent_websocket(websocket: WebSocket, call_id: str):
 
             if is_response_required(request):
                 messages = extract_transcript_messages(request)
-                response_content = await generate_openai_response(messages)
+                response_content, is_emergency = await asyncio.gather(
+                    generate_openai_response(messages),
+                    detect_emergency(messages),
+                )
+                await transcript_manager.set_emergency(call_id, is_emergency)
                 response_event = {
                     "response_id": request.get("response_id"),
                     "content": response_content,

@@ -4,6 +4,7 @@ import {
   createCall,
   fetchPatients,
   fetchCallRecords,
+  isEmergencyStatus,
   isTranscriptSnapshot,
   type CallAttempt,
   type Patient,
@@ -23,6 +24,7 @@ function App() {
   const [startingCall, setStartingCall] = useState(false)
   const [activeTranscriptCallId, setActiveTranscriptCallId] = useState<string | null>(null)
   const [transcriptMessages, setTranscriptMessages] = useState<TranscriptMessage[]>([])
+  const [isEmergency, setIsEmergency] = useState(false)
   const [transcriptStatus, setTranscriptStatus] = useState<
     'idle' | 'connecting' | 'connected' | 'closed' | 'error'
   >('idle')
@@ -166,11 +168,13 @@ function App() {
   useEffect(() => {
     if (!activeTranscriptCallId) {
       setTranscriptMessages([])
+      setIsEmergency(false)
       setTranscriptStatus('idle')
       return
     }
 
     setTranscriptMessages([])
+    setIsEmergency(false)
     setTranscriptStatus('connecting')
 
     const socket = createTranscriptSocket(activeTranscriptCallId)
@@ -183,6 +187,8 @@ function App() {
       const message = JSON.parse(event.data as string) as TranscriptSocketEvent
       if (isTranscriptSnapshot(message)) {
         setTranscriptMessages(message.messages)
+      } else if (isEmergencyStatus(message)) {
+        setIsEmergency(message.is_emergency)
       } else {
         setTranscriptMessages((current) => [...current, message])
       }
@@ -245,6 +251,7 @@ function App() {
         callId={activeTranscriptCallId}
         messages={transcriptMessages}
         status={transcriptStatus}
+        isEmergency={isEmergency}
       />
 
       <CallHistory attempts={callAttempts} />

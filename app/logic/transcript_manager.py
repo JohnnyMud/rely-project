@@ -11,12 +11,20 @@ class TranscriptManager:
     def __init__(self) -> None:
         self._subscribers: dict[str, set[WebSocket]] = {}
         self._messages: dict[str, list[dict[str, str]]] = {}
+        self._emergency_status: dict[str, bool] = {}
 
     async def connect(self, call_id: str, websocket: WebSocket) -> None:
         await websocket.accept()
         self._subscribers.setdefault(call_id, set()).add(websocket)
         for message in self._messages.get(call_id, []):
             await websocket.send_json(message)
+        await websocket.send_json(
+            {
+                "call_id": call_id,
+                "type": "emergency_status",
+                "is_emergency": self._emergency_status.get(call_id, False),
+            }
+        )
 
     def disconnect(self, call_id: str, websocket: WebSocket) -> None:
         subscribers = self._subscribers.get(call_id)
@@ -83,6 +91,22 @@ class TranscriptManager:
         if messages != previous_messages:
             await self._broadcast_snapshot(call_id, messages)
 
+    async def set_emergency(self, call_id: str, is_emergency: bool) -> None:
+        current_status = self._emergency_status.get(call_id)
+        next_status = bool(current_status or is_emergency)
+        if current_status == next_status:
+            return
+
+        self._emergency_status[call_id] = next_status
+        await self._broadcast(
+            call_id,
+            {
+                "call_id": call_id,
+                "type": "emergency_status",
+                "is_emergency": next_status,
+            },
+        )
+
     async def _broadcast_snapshot(
         self, call_id: str, messages: list[dict[str, str]]
     ) -> None:
@@ -102,7 +126,7 @@ class TranscriptManager:
         for websocket in stale_connections:
             self.disconnect(call_id, websocket)
 
-    async def _broadcast(self, call_id: str, message: dict[str, str]) -> None:
+    async def _broadcast(self, call_id: str, message: dict[str, object]) -> None:
         stale_connections: list[WebSocket] = []
         for websocket in self._subscribers.get(call_id, set()):
             try:

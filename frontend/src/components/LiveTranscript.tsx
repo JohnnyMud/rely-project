@@ -4,6 +4,7 @@ type LiveTranscriptProps = {
   callId: string | null
   messages: TranscriptMessage[]
   status: 'idle' | 'connecting' | 'connected' | 'closed' | 'error'
+  isEmergency: boolean
 }
 
 function formatTimestamp(value: string): string {
@@ -14,7 +15,12 @@ function formatTimestamp(value: string): string {
   })
 }
 
-export function LiveTranscript({ callId, messages, status }: LiveTranscriptProps) {
+export function LiveTranscript({
+  callId,
+  messages,
+  status,
+  isEmergency,
+}: LiveTranscriptProps) {
   return (
     <section className="panel transcript-panel">
       <div className="panel-header transcript-header">
@@ -26,7 +32,15 @@ export function LiveTranscript({ callId, messages, status }: LiveTranscriptProps
               : 'Start a patient call to open the live transcript.'}
           </p>
         </div>
-        <span className={`transcript-status status-${status}`}>{status}</span>
+        <div className="transcript-indicators">
+          {isEmergency && (
+            <span className="emergency-indicator" role="alert" aria-live="assertive">
+              <span className="emergency-symbol" aria-hidden="true">!</span>
+              Emergency detected
+            </span>
+          )}
+          <span className={`transcript-status status-${status}`}>{status}</span>
+        </div>
       </div>
 
       <div className="transcript-window" aria-live="polite">

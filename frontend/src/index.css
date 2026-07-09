@@ -189,6 +189,38 @@ input {
   gap: 1rem;
 }
 
+.transcript-indicators {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.emergency-indicator {
+  align-items: center;
+  background: var(--failed);
+  border-radius: 999px;
+  color: #ffffff;
+  display: inline-flex;
+  font-size: 0.75rem;
+  font-weight: 800;
+  gap: 0.4rem;
+  letter-spacing: 0.04em;
+  padding: 0.3rem 0.65rem;
+  text-transform: uppercase;
+}
+
+.emergency-symbol {
+  align-items: center;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  display: inline-flex;
+  height: 1.15rem;
+  justify-content: center;
+  line-height: 1;
+  width: 1.15rem;
+}
+
 .transcript-status {
   border-radius: 999px;
   background: #f1f5f9;
