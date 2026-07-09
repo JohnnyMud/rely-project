@@ -24,13 +24,16 @@ class Patients(Base):
     appointment_time: Mapped[time]
     timezone: Mapped[str]
 
-    calls: Mapped[list["CallAttempts"]] = relationship(back_populates="patient")
+    calls: Mapped[list["CallAttempts"]] = relationship(
+        back_populates="patient",
+        cascade="all, delete-orphan",
+    )
 
 class CallAttempts(Base):
     __tablename__ = "calls"
 
     call_attempt_id: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid.uuid4()))
-    patient_id: Mapped[str] = mapped_column(ForeignKey("patients.id"))
+    patient_id: Mapped[str] = mapped_column(ForeignKey("patients.id", ondelete="CASCADE"))
     retell_call_id: Mapped[str | None] = mapped_column(nullable=True)
     created_at: Mapped[datetime]
     started_at: Mapped[datetime | None] = mapped_column(nullable=True)
