@@ -18,8 +18,10 @@ function statusLabel(status: CallAttempt['status']): string {
   switch (status) {
     case 'pending':
       return 'Pending'
-    case 'success':
-      return 'Created'
+    case 'initiated':
+      return 'Initiated'
+    case 'ended':
+      return 'Ended'
     case 'failed':
       return 'Failed'
   }

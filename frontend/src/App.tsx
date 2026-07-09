@@ -76,7 +76,9 @@ function App() {
               ? 'failed'
               : record.call_status === 'pending'
                 ? 'pending'
-                : 'success',
+                : record.call_status === 'ended'
+                  ? 'ended'
+                  : 'initiated',
           message: record.summary ?? undefined,
         }))
         setCallAttempts(mappedAttempts)
@@ -119,7 +121,7 @@ function App() {
       setCallAttempts((current) =>
         current.map((attempt) =>
           attempt.id === attemptId
-            ? { ...attempt, status: 'success', message: 'Call record created.' }
+            ? { ...attempt, status: 'initiated', message: 'Call record created.' }
             : attempt,
         ),
       )
@@ -148,10 +150,9 @@ function App() {
       <header className="app-header">
         <div>
           <p className="eyebrow">Patient AI Appointment Reminder</p>
-          <h1>Patients</h1>
+          <h1>Patient Calling Portal</h1>
           <p className="lede">
-            Select a patient, then start a call attempt. Call creation is wired for
-            the future API endpoint.
+            Select a patient, then start a call attempt.
           </p>
         </div>
 

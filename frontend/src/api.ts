@@ -28,7 +28,7 @@ export type CallRecord = {
   summary: string | null
 }
 
-export type CallAttemptStatus = 'pending' | 'success' | 'failed'
+export type CallAttemptStatus = 'pending' | 'initiated' | 'ended' | 'failed'
 
 export type CallAttempt = {
   id: string

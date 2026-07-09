@@ -7,8 +7,10 @@
   --muted: #64748b;
   --accent: #3a4f9a;
   --accent-hover: #304288;
-  --success: #15803d;
-  --success-bg: #dcfce7;
+  --initiated: #1d4ed8;
+  --initiated-bg: #dbeafe;
+  --ended: #15803d;
+  --ended-bg: #dcfce7;
   --pending: #b45309;
   --pending-bg: #fef3c7;
   --failed: #b91c1c;
@@ -223,10 +225,16 @@ input {
   color: var(--pending);
 }
 
-.status-badge.status-success,
-.call-item.status-success {
-  background: var(--success-bg);
-  color: var(--success);
+.status-badge.status-initiated,
+.call-item.status-initiated {
+  background: var(--initiated-bg);
+  color: var(--initiated);
+}
+
+.status-badge.status-ended,
+.call-item.status-ended {
+  background: var(--ended-bg);
+  color: var(--ended);
 }
 
 .status-badge.status-failed,
