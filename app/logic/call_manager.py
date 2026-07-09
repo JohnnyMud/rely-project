@@ -43,16 +43,17 @@ def call_patient(patient: Patients, db: Session):
     patient_id = patient.id
     call_attempt = create_call_attempt(patient_id, db)
     call_succeeded = initiate_retell_call(patient)
-    retell_call_id = call_succeeded.call_id
     
     if not call_succeeded:
         call_attempt.call_status = "failed"
         db.commit()
         db.refresh(call_attempt)
     
-    call_attempt.call_status = "initiated"
-    call_attempt.retell_call_id = retell_call_id
-    db.commit()
-    db.refresh(call_attempt)
+    if call_succeeded:
+        retell_call_id = call_succeeded.call_id
+        call_attempt.call_status = "initiated"
+        call_attempt.retell_call_id = retell_call_id
+        db.commit()
+        db.refresh(call_attempt)
 
     return call_attempt
