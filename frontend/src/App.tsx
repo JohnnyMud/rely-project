@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react'
 import {
+  createTranscriptSocket,
   createCall,
   fetchPatients,
   fetchCallRecords,
+  isTranscriptSnapshot,
   type CallAttempt,
   type Patient,
+  type TranscriptMessage,
+  type TranscriptSocketEvent,
 } from './api'
 import { CallHistory } from './components/CallHistory'
+import { LiveTranscript } from './components/LiveTranscript'
 import { PatientTable } from './components/PatientTable'
 
 function App() {
@@ -16,6 +21,11 @@ function App() {
   const [loadingPatients, setLoadingPatients] = useState(true)
   const [patientsError, setPatientsError] = useState<string | null>(null)
   const [startingCall, setStartingCall] = useState(false)
+  const [activeTranscriptCallId, setActiveTranscriptCallId] = useState<string | null>(null)
+  const [transcriptMessages, setTranscriptMessages] = useState<TranscriptMessage[]>([])
+  const [transcriptStatus, setTranscriptStatus] = useState<
+    'idle' | 'connecting' | 'connected' | 'closed' | 'error'
+  >('idle')
 
   useEffect(() => {
     let cancelled = false
@@ -80,6 +90,7 @@ function App() {
                   ? 'ended'
                   : 'initiated',
           message: record.summary ?? undefined,
+          retellCallId: record.retell_call_id,
         }))
         setCallAttempts(mappedAttempts)
       } catch {
@@ -117,11 +128,18 @@ function App() {
     setStartingCall(true)
 
     try {
-      await createCall(selectedPatient.id)
+      const callRecord = await createCall(selectedPatient.id)
+      setActiveTranscriptCallId(callRecord.retell_call_id)
       setCallAttempts((current) =>
         current.map((attempt) =>
           attempt.id === attemptId
-            ? { ...attempt, status: 'initiated', message: 'Call record created.' }
+            ? {
+                ...attempt,
+                id: callRecord.call_attempt_id,
+                status: 'initiated',
+                message: 'Call record created.',
+                retellCallId: callRecord.retell_call_id,
+              }
             : attempt,
         ),
       )
@@ -144,6 +162,44 @@ function App() {
       setStartingCall(false)
     }
   }
+
+  useEffect(() => {
+    if (!activeTranscriptCallId) {
+      setTranscriptMessages([])
+      setTranscriptStatus('idle')
+      return
+    }
+
+    setTranscriptMessages([])
+    setTranscriptStatus('connecting')
+
+    const socket = createTranscriptSocket(activeTranscriptCallId)
+
+    socket.addEventListener('open', () => {
+      setTranscriptStatus('connected')
+    })
+
+    socket.addEventListener('message', (event) => {
+      const message = JSON.parse(event.data as string) as TranscriptSocketEvent
+      if (isTranscriptSnapshot(message)) {
+        setTranscriptMessages(message.messages)
+      } else {
+        setTranscriptMessages((current) => [...current, message])
+      }
+    })
+
+    socket.addEventListener('error', () => {
+      setTranscriptStatus('error')
+    })
+
+    socket.addEventListener('close', () => {
+      setTranscriptStatus((current) => (current === 'error' ? 'error' : 'closed'))
+    })
+
+    return () => {
+      socket.close()
+    }
+  }, [activeTranscriptCallId])
 
   return (
     <main className="app">
@@ -184,6 +240,12 @@ function App() {
           error={patientsError}
         />
       </section>
+
+      <LiveTranscript
+        callId={activeTranscriptCallId}
+        messages={transcriptMessages}
+        status={transcriptStatus}
+      />
 
       <CallHistory attempts={callAttempts} />
     </main>

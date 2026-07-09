@@ -1,4 +1,9 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? ''
+const WS_BASE =
+  import.meta.env.VITE_WS_BASE_URL ||
+  (API_BASE
+    ? API_BASE.replace(/^http/, 'ws')
+    : `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`)
 
 export type Patient = {
   id: string
@@ -37,6 +42,28 @@ export type CallAttempt = {
   startedAt: string
   status: CallAttemptStatus
   message?: string
+  retellCallId?: string | null
+}
+
+export type TranscriptMessage = {
+  call_id: string
+  role: 'agent' | 'user'
+  content: string
+  timestamp: string
+}
+
+export type TranscriptSocketEvent =
+  | TranscriptMessage
+  | {
+      call_id: string
+      type: 'transcript_snapshot'
+      messages: TranscriptMessage[]
+    }
+
+export function isTranscriptSnapshot(
+  event: TranscriptSocketEvent,
+): event is Extract<TranscriptSocketEvent, { type: 'transcript_snapshot' }> {
+  return 'type' in event && event.type === 'transcript_snapshot'
 }
 
 async function parseError(response: Response): Promise<string> {
@@ -83,4 +110,8 @@ export async function createCall(patientId: string): Promise<CallRecord> {
   }
 
   return response.json() as Promise<CallRecord>
+}
+
+export function createTranscriptSocket(callId: string): WebSocket {
+  return new WebSocket(`${WS_BASE}/websocket/live-transcript/${callId}`)
 }

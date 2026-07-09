@@ -11,9 +11,4 @@ async def retell_webhook(
     payload: dict,
     db: Session = Depends(get_db)
 ):
-    call_attempt = db.query(CallAttempts).filter(CallAttempts.retell_call_id == payload["call_id"]).first()
-    call_attempt.call_status = payload["status"]
-    db.commit()
-    db.refresh(call_attempt)
-    
     return {"message": "Webhook received"}

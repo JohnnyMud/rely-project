@@ -45,3 +45,11 @@ class CallAttempts(Base):
     summary: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     patient: Mapped["Patients"] = relationship(back_populates="calls")
+
+
+class Transcripts(Base):
+    __tablename__ = "transcripts"
+
+    call_id: Mapped[str] = mapped_column(primary_key=True)
+    patient_id: Mapped[str] = mapped_column(ForeignKey("patients.id", ondelete="CASCADE"))
+    transcript: Mapped[str] = mapped_column(Text)

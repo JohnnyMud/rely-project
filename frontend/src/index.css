@@ -182,6 +182,77 @@ input {
   color: var(--failed);
 }
 
+.transcript-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.transcript-status {
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.55rem;
+  text-transform: uppercase;
+}
+
+.transcript-status.status-connected {
+  background: var(--ended-bg);
+  color: var(--ended);
+}
+
+.transcript-status.status-connecting {
+  background: var(--pending-bg);
+  color: var(--pending);
+}
+
+.transcript-status.status-error {
+  background: var(--failed-bg);
+  color: var(--failed);
+}
+
+.transcript-window {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: grid;
+  gap: 0.75rem;
+  max-height: 24rem;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.transcript-message {
+  border-radius: 10px;
+  max-width: 80%;
+  padding: 0.75rem;
+}
+
+.transcript-message.role-agent {
+  background: var(--initiated-bg);
+  color: var(--text-h);
+  justify-self: start;
+}
+
+.transcript-message.role-user {
+  background: var(--selected);
+  color: var(--text-h);
+  justify-self: end;
+}
+
+.transcript-message-meta {
+  color: var(--muted);
+  display: flex;
+  font-size: 0.75rem;
+  gap: 0.5rem;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+}
+
 .call-history {
   list-style: none;
   margin: 0;

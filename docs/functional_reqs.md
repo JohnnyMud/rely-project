@@ -11,5 +11,13 @@
 - Don’t spend the whole project on polish.
 - Use synthetic test data only, never real patient information.
 - Don’t hide uncertainty. Just write it down.
+
+## My Ideas for Future Additions
 - Fetch patient call history
+- update appt time
+- delete button next to patients
+- Filter for patients with no call attemps / indicator for patients with no calls
+- xlsx upload support
+- display summary data from webhook
+- auto voicemail or sms as a fallback on 2 failed calls, or ask for sms preference for future comms
 
