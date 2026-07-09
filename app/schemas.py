@@ -1,4 +1,4 @@
-from datetime import date, time
+from datetime import date, datetime, time
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -32,3 +32,19 @@ class PatientResponse(BaseModel):
     appointment_date: date
     appointment_time: time
     timezone: str
+
+
+class CallResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    call_attempt_id: str
+    patient_id: str
+    retell_call_id: str | None
+    created_at: datetime
+    started_at: datetime | None
+    ended_at: datetime | None
+    call_duration: int | None
+    call_status: str
+    successful: bool | None
+    recording_url: str | None
+    summary: str | None
